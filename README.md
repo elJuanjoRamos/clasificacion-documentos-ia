@@ -109,13 +109,12 @@ Evaluación
 ```
 
 
-
-
-
-```markdown id="n7r5lz"
 # Pipeline Inteligente de Clasificación Documental
 
+
+
 ```text
+
 1. Documento entra
    ↓
 2. Extracción de texto por tipo de archivo
@@ -178,6 +177,7 @@ Evaluación
    ├─ recall
    ├─ F1-score
    └─ tiempo de procesamiento
+
 ```
 
 ## Enfoque de Arquitectura
@@ -194,105 +194,106 @@ Evaluación
 # EJEMPLO DE SALIDA DE TEXTO NORMALIZADO
 
 
-## FEATURES GENERALES
+```text
+FEATURES GENERALES
+====================
 
-## UBICACIONES
+UBICACIONES:
 - San Antonio Aguas Calientes
 - Sacatepéquez Su Despacho
 - Antigua Guatemala
 - departamento de Sacatepéquez
 
-## PERSONAS
+PERSONAS:
 - Jane Doe
 - Jon Doe
-- Janis Doe
 - Jim Doe
 - Jack Doe
+- Joe Doe
 
-## CONCEPTOS
+CONCEPTOS:
 - Calle final norte
 - De Subestacion 74-4-3
 
----
+====================
 
-# BLOQUES
+TIPO: paragraph
 
-## TIPO: paragraph
-
-### FECHAS
+FECHAS:
 - 21 de mayo de 2023
 
-### TEXTO
+TEXTO:
 San Antonio Aguas Calientes 21 de mayo de 2023.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### TEXTO
+TEXTO:
 Diligencia Policial No.123-456...Ref....ARLG./aap.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### TEXTO
+TEXTO:
 JUEZ DE PAZ LOCAL SAN ANTONIO AGUAS CALIENTES, SACATEPÉQUEZ SU DESPACHO.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### HORAS
+HORAS:
 - 10:05
 
-### TEXTO
+TEXTO:
 Atentamente me dirijo a usted, con la finalidad de informarle que el día de hoy siendo las 10:05 horas, a esta subestación policial se presentó la señorita, quien dijo ser de los datos de identificación siguientes.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### CANTIDADES
+CANTIDADES:
 - 19 años
 
-### TEXTO
-Jane Doe: de 19 años de edad, soltera, instruida, secretaria bilingüe, originaria de Antigua Guatemala y residente en 4a. Calle final norte, del municipio de San Antonio Aguas Calientes, departamento de Sacatepéquez, hija de Jon Doe y de Janis Doe, quien no presentó documento personal de identificación, proporcionando el número de teléfono 5954-3592. Para cualquier notificación.
+TEXTO:
+Jane Doe: de 19 años de edad, soltera, instruida, secretaria bilingüe, originaria de Antigua Guatemala y residente en 4a. Calle final norte, del municipio de San Antonio Aguas Calientes, departamento de Sacatepéquez, hija de Jon Doe y de Jim Doe, quien no presentó documento personal de identificación, proporcionando el número de teléfono 5954-3592. Para cualquier notificación.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### FECHAS
+FECHAS:
 - 21-05-2023
 
-### HORAS
+HORAS:
 - 23:00
 - 23:30
 
-### CANTIDADES
+CANTIDADES:
 - 20 años
 
-### TEXTO
-MANIFESTANDO: que tiene dos meses de convivir con el señor: Jim Doe de 20 años de edad, quien puede ser localizado en la misma dirección de la denunciante o al número de celular 4310-2383, indicando la denunciante que desde hace tres semanas ha tenido inconvenientes con su conviviente por celos, es el caso que el día de ayer 21-05-2023 a eso de las 23:00 horas retornaron de una boda y siendo las 23:30 horas llegaron unos amigos a convivir con ellos y bebieron unas cervezas, en ese transcurso su conviviente la empujó y cayó en las gradas por lo que se ocasionó dos erosiones uno en el brazo izquierdo y pierna izquierda indicando no ameritar asistencia médica.
+TEXTO:
+MANIFESTANDO: que tiene dos meses de convivir con el señor: Jack Doe de 20 años de edad, quien puede ser localizado en la misma dirección de la denunciante o al número de celular 4310-2383, indicando la denunciante que desde hace tres semanas ha tenido inconvenientes con su conviviente por celos, es el caso que el día de ayer 21-05-2023 a eso de las 23:00 horas retornaron de una boda y siendo las 23:30 horas llegaron unos amigos a convivir con ellos y bebieron unas cervezas, en ese transcurso su conviviente la empujó y cayó en las gradas por lo que se ocasionó dos erosiones uno en el brazo izquierdo y pierna izquierda indicando no ameritar asistencia médica.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### TEXTO
+TEXTO:
 Por lo antes descrito solicita se hiciera del conocimiento de ese juzgado, persona quien fue prevenida de comparecer, en horas y días hábiles, para ratificar lo antes expuesto.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### TEXTO
+TEXTO:
 Del señor (a) Juez deferentemente.
 
----
+====================
 
-## TIPO: paragraph
+TIPO: paragraph
 
-### TEXTO
-Jack Doe ENCARGADO DE SUBESTACION 74-4-3 SAN ANTONIO AGUAS CALIENTES
+TEXTO:
+Joe Doe ENCARGADO DE SUBESTACION 74-4-3 SAN ANTONIO AGUAS CALIENTES
+```
