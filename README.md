@@ -199,10 +199,9 @@ FEATURES GENERALES
 ====================
 
 UBICACIONES:
-- San Antonio Aguas Calientes
-- Sacatepéquez Su Despacho
-- Antigua Guatemala
-- departamento de Sacatepéquez
+- Ciudad Central
+- Zona Empresarial Norte
+- Parque Industrial Delta
 
 PERSONAS:
 - Jane Doe
@@ -212,88 +211,81 @@ PERSONAS:
 - Joe Doe
 
 CONCEPTOS:
-- Calle final norte
-- De Subestacion 74-4-3
+- Oficina principal
+- Proyecto Alpha
 
 ====================
 
 TIPO: paragraph
 
 FECHAS:
-- 21 de mayo de 2023
+- 15 de marzo de 2026
 
 TEXTO:
-San Antonio Aguas Calientes 21 de mayo de 2023.
+Ciudad Central, 15 de marzo de 2026.
 
 ====================
 
 TIPO: paragraph
 
 TEXTO:
-Diligencia Policial No.123-456...Ref....ARLG./aap.
+Reporte interno No.204-2026...Ref....JDD./adm.
 
 ====================
 
 TIPO: paragraph
 
 TEXTO:
-JUEZ DE PAZ LOCAL SAN ANTONIO AGUAS CALIENTES, SACATEPÉQUEZ SU DESPACHO.
+DEPARTAMENTO DE OPERACIONES ZONA EMPRESARIAL NORTE.
 
 ====================
 
 TIPO: paragraph
 
 HORAS:
-- 10:05
+- 09:30
 
 TEXTO:
-Atentamente me dirijo a usted, con la finalidad de informarle que el día de hoy siendo las 10:05 horas, a esta subestación policial se presentó la señorita, quien dijo ser de los datos de identificación siguientes.
+El día de hoy a las 09:30 horas se realizó una reunión entre los integrantes del equipo para discutir avances relacionados con el Proyecto Alpha.
 
 ====================
 
 TIPO: paragraph
 
 CANTIDADES:
-- 19 años
+- 5 años
 
 TEXTO:
-Jane Doe: de 19 años de edad, soltera, instruida, secretaria bilingüe, originaria de Antigua Guatemala y residente en 4a. Calle final norte, del municipio de San Antonio Aguas Calientes, departamento de Sacatepéquez, hija de Jon Doe y de Jim Doe, quien no presentó documento personal de identificación, proporcionando el número de teléfono 5954-3592. Para cualquier notificación.
+Jane Doe, con experiencia de 5 años en administración de proyectos, presentó el resumen ejecutivo correspondiente al cierre trimestral.
 
 ====================
 
 TIPO: paragraph
 
 FECHAS:
-- 21-05-2023
+- 16-03-2026
 
 HORAS:
-- 23:00
-- 23:30
+- 14:00
+- 16:30
 
 CANTIDADES:
-- 20 años
+- 3 equipos
 
 TEXTO:
-MANIFESTANDO: que tiene dos meses de convivir con el señor: Jack Doe de 20 años de edad, quien puede ser localizado en la misma dirección de la denunciante o al número de celular 4310-2383, indicando la denunciante que desde hace tres semanas ha tenido inconvenientes con su conviviente por celos, es el caso que el día de ayer 21-05-2023 a eso de las 23:00 horas retornaron de una boda y siendo las 23:30 horas llegaron unos amigos a convivir con ellos y bebieron unas cervezas, en ese transcurso su conviviente la empujó y cayó en las gradas por lo que se ocasionó dos erosiones uno en el brazo izquierdo y pierna izquierda indicando no ameritar asistencia médica.
+Jon Doe indicó que el día 16-03-2026 entre las 14:00 y 16:30 horas se completó la instalación de 3 equipos en la Oficina Principal del Parque Industrial Delta.
 
 ====================
 
 TIPO: paragraph
 
 TEXTO:
-Por lo antes descrito solicita se hiciera del conocimiento de ese juzgado, persona quien fue prevenida de comparecer, en horas y días hábiles, para ratificar lo antes expuesto.
+Jim Doe solicitó que el documento final fuera enviado al área administrativa para revisión y validación correspondiente.
 
 ====================
 
 TIPO: paragraph
 
 TEXTO:
-Del señor (a) Juez deferentemente.
-
-====================
-
-TIPO: paragraph
-
-TEXTO:
-Joe Doe ENCARGADO DE SUBESTACION 74-4-3 SAN ANTONIO AGUAS CALIENTES
+Jack Doe confirmó la recepción del informe y Joe Doe quedó encargado del seguimiento técnico del Proyecto Alpha.
 ```
