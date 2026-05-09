@@ -1,0 +1,24 @@
+# =========================
+# DEPENDENCIAS PRINCIPALES
+# =========================
+
+customtkinter
+pillow
+pandas
+pywin32
+pdfplumber
+pytesseract
+pdf2image
+opencv-python
+requests
+sentence-transformers
+scikit-learn
+pymupdf
+spacy
+
+# =========================
+# MODELOS Y CONFIGURACION
+# =========================
+
+#python -m spacy download es_core_news_md
+#python -m pywin32_postinstall install
