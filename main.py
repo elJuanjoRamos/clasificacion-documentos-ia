@@ -362,7 +362,17 @@ class DocumentIngestionApp(ctk.CTk):
             justify="center"
         )
 
-        self.loading_label.place(relx=0.5, rely=0.5, anchor="center")
+        self.loading_label.place(relx=0.5, rely=0.4, anchor="center")
+
+        self.loading_progress_label = tk.Label(
+            self.loading_overlay,
+            text="",
+            font=("Segoe UI", 12),
+            bg="#ffffff",
+            fg="#666666",
+            justify="center"
+        )
+        self.loading_progress_label.place(relx=0.5, rely=0.6, anchor="center")
 
         # Oculto por defecto
         self.loading_overlay.place_forget()
@@ -547,53 +557,86 @@ class DocumentIngestionApp(ctk.CTk):
 
     def run_classification(self):
         files = self.get_files_from_tree()
-        results = process_documents(files)
+        total = len(files)
+
+        def progress_callback(current: int, total_files: int, file_name: str, status: str):
+            """Actualiza el overlay con el documento actual (llamado desde hilo worker)."""
+            if status == "extrayendo":
+                msg = f"Fase 1/2 (Extracción) - {current}/{total_files}:\n{file_name}"
+            else:
+                estado_texto = "Analizando Semántica" if status == "procesando" else "Completado"
+                msg = f"Fase 2/2 ({estado_texto}) - {current}/{total_files}:\n{file_name}"
+            
+            def update_ui():
+                self.loading_progress_label.configure(text=msg)
+                if status == "completado":
+                    pct = int((current / total_files) * 100) if total_files else 100
+                    self._update_progress(pct / 100.0)
+                self.update_idletasks() # Fuerza a la interfaz a redibujarse INMEDIATAMENTE
+            
+            self.after(0, update_ui)
+
+        results = process_documents(files, progress_callback=progress_callback)
         self.after(0, lambda: self.on_classification_done(results))
+
+    # Mapeo de file_type (minúscula) → clave de tree_images
+    _FILE_TYPE_ICON = {
+        "word":  "Word",
+        "pdf":   "PDF",
+        "excel": "Excel",
+        "image": "Imagen",
+        "xml":   "XML",
+        "txt":   "TXT",
+    }
 
     def on_classification_done(self, results):
         self.hide_loading()
-
         self.clear_tree()
-         
+
+        # ── Guardar JSON completo en disco ──────────────────────────────
         try:
             ruta = "./datos.json"
-            with open(ruta, 'w', encoding='utf-8') as archivo:
+            with open(ruta, "w", encoding="utf-8") as archivo:
                 json.dump(results, archivo, ensure_ascii=False, indent=4)
             print(f"Archivo guardado correctamente en: {ruta}")
         except Exception as e:
             print(f"Error al guardar el archivo: {e}")
-        """
-        
+
+        # ── Reconfigurar columnas para vista de clasificación ───────────
         self.tree["columns"] = (
             "clasificacion",
-            "tipo_documento",
-            "area_funcional",
+            "confianza",
+            "subtipo",
             "tema",
             "resumen",
             "full_path",
         )
 
-        self.tree.heading("#0", text="Documento")
-        self.tree.heading("clasificacion", text="Clasificación")
-        self.tree.heading("tipo_documento", text="Tipo documento")
-        self.tree.heading("area_funcional", text="Área funcional")
-        self.tree.heading("tema", text="Tema")
-        self.tree.heading("resumen", text="Resumen")
-        self.tree.heading("full_path", text="Ruta completa")
+        self.tree.heading("#0",            text="Documento")
+        self.tree.heading("clasificacion", text="Categoría")
+        self.tree.heading("confianza",     text="Confianza")
+        self.tree.heading("subtipo",       text="Subtipo")
+        self.tree.heading("tema",          text="Tema")
+        self.tree.heading("resumen",       text="Resumen")
+        self.tree.heading("full_path",     text="Ruta completa")
 
-        self.tree.column("#0", width=320, anchor="w")
+        self.tree.column("#0",            width=260, anchor="w")
         self.tree.column("clasificacion", width=160, anchor="center")
-        self.tree.column("tipo_documento", width=220, anchor="w")
-        self.tree.column("area_funcional", width=160, anchor="center")
-        self.tree.column("tema", width=280, anchor="w")
-        self.tree.column("resumen", width=480, anchor="w")
-        self.tree.column("full_path", width=500, anchor="w")
+        self.tree.column("confianza",     width=100, anchor="center")
+        self.tree.column("subtipo",       width=200, anchor="w")
+        self.tree.column("tema",          width=280, anchor="w")
+        self.tree.column("resumen",       width=460, anchor="w")
+        self.tree.column("full_path",     width=500, anchor="w")
 
+        # ── Poblar tabla con resultados del agente ──────────────────────
         for row in results:
-            icon = self.tree_images.get(row.get("type"), self.tree_images["default"])
-            llm = row.get("llm_classification", {})
+            icon_key = self._FILE_TYPE_ICON.get(row.get("file_type", ""), "default")
+            icon     = self.tree_images.get(icon_key, self.tree_images["default"])
 
-            resumen = llm.get("resumen", "")
+            decision = row.get("agent_decision", {})
+            profile  = row.get("semantic_profile", {})
+
+            resumen = profile.get("resumen", "") or ""
             if len(resumen) > 160:
                 resumen = resumen[:160] + "..."
 
@@ -603,15 +646,15 @@ class DocumentIngestionApp(ctk.CTk):
                 text=row.get("file_name", ""),
                 image=icon,
                 values=(
-                    llm.get("clasificacion", ""),
-                    llm.get("tipo_documento", ""),
-                    llm.get("area_funcional", ""),
-                    llm.get("tema", ""),
-                    resumen,
+                    decision.get("categoria_final", "—"),
+                    decision.get("confianza",        "—"),
+                    profile.get("subcategoria",      "—"),
+                    profile.get("tema",              "—"),
+                    resumen or "—",
                     row.get("full_path", ""),
                 ),
             )
-        """
+
         self.status_label.configure(text="✅ Clasificación completada")
 
 if __name__ == "__main__":

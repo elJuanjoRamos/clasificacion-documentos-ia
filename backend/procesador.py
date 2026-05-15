@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import os
 import time
+import threading
 
 from backend.llm.llm import analyze_document_with_llm
 from backend.embeddings.embeddings import (
@@ -12,6 +13,7 @@ from backend.embeddings.embeddings import (
     decide_category_from_similarity,
     should_call_llm_from_similarity,
     build_decision_without_llm,
+    sync_category_to_vector_store,
 )
 from backend.category_memory.category_memory import (
     load_category_memory,
@@ -31,20 +33,28 @@ from .normalizer.normalizer import normalize_extraction_result
 MAX_FILE_WORKERS = 4
 
 
-def process_documents(files: list[dict]) -> list[dict]:
-    
+def process_documents(files: list[dict], progress_callback=None) -> list[dict]:
     results = []
+    total = len(files)
+
+    if progress_callback:
+        progress_callback(0, total, "Iniciando extracción de texto...", "extrayendo")
 
     with ThreadPoolExecutor(max_workers=MAX_FILE_WORKERS) as executor:
-        futures = [
-            executor.submit(process_single_document_before_decision, file)
+        futures = {
+            executor.submit(process_single_document_before_decision, file): file
             for file in files
-        ]
+        }
 
+        extracted_count = 0
         for future in as_completed(futures):
-            results.append(future.result())
+            res = future.result()
+            results.append(res)
+            extracted_count += 1
+            if progress_callback:
+                progress_callback(extracted_count, total, res.get("file_name", "Desconocido"), "extrayendo")
 
-    return results #apply_optimized_semantic_flow(results)
+    return apply_optimized_semantic_flow(results, progress_callback=progress_callback)
 
 
 def process_single_document_before_decision(file: dict) -> dict:
@@ -66,10 +76,7 @@ def process_single_document_before_decision(file: dict) -> dict:
         start = time.perf_counter()
         normalized_result = normalize_extraction_result(extraction_result)
         t_normalization = time.perf_counter() - start
-        
-        return normalized_result
-        
-        """
+
         normalized_result["file_name"] = file.get("name") or path.name
         normalized_result["full_path"] = str(path)
 
@@ -81,11 +88,10 @@ def process_single_document_before_decision(file: dict) -> dict:
             "post_llm_embeddings": 0.0,
             "memory": 0.0,
             "total_before_decision": round(time.perf_counter() - total_start, 3),
-            "total": round(time.perf_counter() - total_start, 3)
+            "total": round(time.perf_counter() - total_start, 3),
         }
 
         return normalized_result
-        """
     except Exception as e:
         failed = build_failed_result(file, ext, path, str(e))
         failed["processing_times"] = {
@@ -101,23 +107,29 @@ def process_single_document_before_decision(file: dict) -> dict:
         return failed
 
 
-def apply_optimized_semantic_flow(results: list[dict]) -> list[dict]:
+def apply_optimized_semantic_flow(results: list[dict], progress_callback=None) -> list[dict]:
     """
-    Controla cuándo se llama al LLM.
-
-    Nota: esta fase es secuencial para no saturar Ollama cuando sí haga falta usarlo.
-    Los embeddings son rápidos, pero se mantienen aquí para tomar decisiones ordenadas
-    y actualizar la memoria de forma consistente.
+    Fase semántica PARALELIZADA.
+    Envía múltiples peticiones simultáneas a Ollama y ChromaDB para saturar
+    positivamente la GPU y reducir dramáticamente los tiempos de procesamiento.
     """
+    total = len(results)
+    completed = 0
+    lock = threading.Lock() # Para actualizar contadores de UI de forma segura
 
-    for row in results:
+    def process_semantic(row: dict) -> dict:
+        nonlocal completed
+        # Avisar que empezamos con este doc
+        if progress_callback:
+            with lock:
+                progress_callback(completed + 1, total, row.get("file_name", ""), "procesando")
         if row.get("error"):
             row["semantic_profile"] = {}
             row["pre_llm_memory_matches"] = []
             row["memory_matches"] = []
             row["llm_control"] = {"call_llm": False, "level": "error"}
             row["agent_decision"] = build_error_decision(row.get("error"))
-            continue
+            return row
 
         total_start = time.perf_counter()
 
@@ -186,6 +198,12 @@ def apply_optimized_semantic_flow(results: list[dict]) -> list[dict]:
                 save_provisional=True
             )
 
+            # Sincronizar el vector actualizado con ChromaDB
+            sync_category_to_vector_store(
+                memory=memory,
+                category_name=row["agent_decision"].get("categoria_final"),
+            )
+
             row["processing_times"]["memory"] = round(time.perf_counter() - start, 3)
 
         except Exception as e:
@@ -200,7 +218,21 @@ def apply_optimized_semantic_flow(results: list[dict]) -> list[dict]:
             3
         )
 
-    return results
+        if progress_callback:
+            with lock:
+                completed += 1
+                progress_callback(completed, total, row.get("file_name", ""), "completado")
+        
+        return row
+
+    # Ejecutar en paralelo (satura la GPU usando hasta 4 workers)
+    final_results = []
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        futures = {executor.submit(process_semantic, row): row for row in results}
+        for future in as_completed(futures):
+            final_results.append(future.result())
+
+    return final_results
 
 
 def build_error_decision(error: str) -> dict:
