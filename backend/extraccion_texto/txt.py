@@ -1,9 +1,24 @@
 import re
 
-from .utils import clean_text, create_block, build_document_output
+from .utils import (
+    clean_text,
+    create_block,
+    build_document_output,
+    load_extraction_config,
+    limit_blocks_by_chars
+)
+
+
+ENCODINGS = ("utf-8", "utf-8-sig", "latin-1", "cp1252")
+
+LIST_ITEM_PATTERN = re.compile(
+    r"^([-*•]|\d+\.|[a-zA-Z]\))\s+"
+)
 
 
 def main_txt(ext, path):
+    config = load_extraction_config()
+
     blocks = []
     error = None
     supported = False
@@ -11,6 +26,12 @@ def main_txt(ext, path):
 
     try:
         blocks = get_txt_text(path)
+
+        blocks = limit_blocks_by_chars(
+            blocks=blocks,
+            max_chars=config.get("max_caracteres_txt", 4000)
+        )
+
         supported = True
         extraction_method = "txt_native"
 
@@ -25,14 +46,18 @@ def main_txt(ext, path):
         blocks=blocks,
         error=error,
         file_path=path,
-        metadata={},
+        metadata={
+            "config": {
+                "max_caracteres_txt": config.get("max_caracteres_txt", 4000)
+            }
+        },
         type_metadata_key="txt_metadata"
     )
 
+
 def get_txt_text(file_path: str) -> list[dict]:
     content = read_txt_file(file_path)
-
-    sections = split_text_sections(content)
+    sections = re.split(r"\n\s*\n+", content)
 
     blocks = []
 
@@ -42,19 +67,12 @@ def get_txt_text(file_path: str) -> list[dict]:
         if not text:
             continue
 
-        block_type = (
-            "list_item"
-            if is_list_item(text)
-            else "paragraph"
-        )
-
-        if block_type == "list_item":
-            text = clean_list_item(text)
+        is_list = bool(LIST_ITEM_PATTERN.match(text))
 
         blocks.append(create_block(
             order=len(blocks) + 1,
-            block_type=block_type,
-            text=text,
+            block_type="list_item" if is_list else "paragraph",
+            text=LIST_ITEM_PATTERN.sub("", text).strip() if is_list else text,
             source="txt_section"
         ))
 
@@ -62,16 +80,9 @@ def get_txt_text(file_path: str) -> list[dict]:
 
 
 def read_txt_file(file_path: str) -> str:
-    encodings = [
-        "utf-8",
-        "utf-8-sig",
-        "latin-1",
-        "cp1252"
-    ]
-
     last_error = None
 
-    for encoding in encodings:
+    for encoding in ENCODINGS:
         try:
             with open(file_path, "r", encoding=encoding) as file:
                 return file.read()
@@ -80,34 +91,9 @@ def read_txt_file(file_path: str) -> str:
             last_error = e
 
     raise ValueError(
-        "No se pudo leer el archivo. "
+        "No se pudo leer el archivo TXT. "
         f"Último error: {last_error}"
     )
-
-
-def split_text_sections(content: str) -> list[str]:
-    return re.split(r"\n\s*\n+", content)
-
-
-def is_list_item(text: str) -> bool:
-    patterns = [
-        r"^[-*•]\s+",
-        r"^\d+\.\s+",
-        r"^[a-zA-Z]\)\s+"
-    ]
-
-    return any(
-        re.match(pattern, text)
-        for pattern in patterns
-    )
-
-
-def clean_list_item(text: str) -> str:
-    return re.sub(
-        r"^([-*•]|\d+\.|[a-zA-Z]\))\s+",
-        "",
-        text
-    ).strip()
 
 
 def get_total_text_length(blocks: list[dict]) -> int:
@@ -115,5 +101,3 @@ def get_total_text_length(blocks: list[dict]) -> int:
         len(block.get("text", "").strip())
         for block in blocks
     )
-
-

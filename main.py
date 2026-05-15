@@ -14,11 +14,15 @@ from PIL import Image, ImageTk
 
 """CLASIFICADOR"""
 from backend.procesador import process_documents
+from backend.extraccion_texto.utils import (
+    load_extraction_config,
+    save_extraction_config,
+    DEFAULT_EXTRACTION_CONFIG
+)
 
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
-
 
 SUPPORTED_EXTENSIONS = {
     ".pdf": "PDF",
@@ -92,12 +96,12 @@ class DocumentIngestionApp(ctk.CTk):
         super().__init__()
 
         self.title("Demo de ingesta documental")
-        self.geometry("1500x860")
-        self.minsize(1250, 760)
+        self.geometry("1250x720")
+        self.minsize(1250, 720)
 
         self.selected_folder = ""
         self.tree_images: dict[str, ImageTk.PhotoImage] = {}
-
+        self.app_config = load_extraction_config()
         self._load_icons()
         self._build_ui()
 
@@ -205,6 +209,22 @@ class DocumentIngestionApp(ctk.CTk):
             border_color="#93c5fd",
         )
         self.classify_button.pack(side="left", padx=(10, 0))
+        self.config_button = ctk.CTkButton(
+            top_frame,
+            text="Configuración",
+            height=42,
+            corner_radius=8,
+            font=("Segoe UI", 14),
+            command=self.open_config_window,
+            fg_color="#efefef",
+            text_color="#1f1f1f",
+            hover_color="#e4e4e4",
+            border_width=1,
+            border_color="#d0d0d0",
+        )
+        self.config_button.pack(side="left", padx=(10, 0))
+
+
 
         progress_frame = ctk.CTkFrame(self, fg_color="transparent")
         progress_frame.pack(fill="x", padx=20, pady=(12, 0))
@@ -554,6 +574,190 @@ class DocumentIngestionApp(ctk.CTk):
 
         return files
 
+    def open_config_window(self):
+        window = ctk.CTkToplevel(self)
+        window.title("Configuración - Ajusta cómo el sistema analiza los documentos.")
+        window.geometry("920x620")
+        window.resizable(False, False)
+        window.grab_set()
+
+        container = ctk.CTkFrame(window, fg_color="transparent")
+        container.pack(fill="both", expand=True, padx=20, pady=20)
+
+        left_column = ctk.CTkFrame(container, fg_color="transparent")
+        left_column.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        right_column = ctk.CTkFrame(container, fg_color="transparent")
+        right_column.pack(side="left", fill="both", expand=True, padx=(10, 0))
+
+       
+        def create_entry(parent, label, description, value):
+            ctk.CTkLabel(
+                parent,
+                text=label,
+                font=("Segoe UI", 13, "bold"),
+            ).pack(anchor="w")
+
+            ctk.CTkLabel(
+                parent,
+                text=description,
+                font=("Segoe UI", 11),
+                text_color="#666666",
+                wraplength=380,
+                justify="left",
+            ).pack(anchor="w", pady=(0, 4))
+
+            entry = ctk.CTkEntry(
+                parent,
+                height=34,
+                font=("Segoe UI", 13),
+            )
+            entry.pack(fill="x", pady=(0, 14))
+            entry.insert(0, str(value))
+
+            return entry
+
+        pdf_chars_entry = create_entry(
+            left_column,
+            "Máximo caracteres PDF",
+            "Cantidad máxima de texto a analizar en PDFs.",
+            self.app_config.get("max_caracteres_pdf", 15000)
+        )
+
+        word_chars_entry = create_entry(
+            left_column,
+            "Máximo caracteres Word",
+            "Cantidad máxima de texto a analizar en Word.",
+            self.app_config.get("max_caracteres_word", 8000)
+        )
+
+        excel_chars_entry = create_entry(
+            left_column,
+            "Máximo caracteres Excel",
+            "Cantidad máxima de contenido a analizar en Excel.",
+            self.app_config.get("max_caracteres_excel", 6000)
+        )
+
+        txt_chars_entry = create_entry(
+            left_column,
+            "Máximo caracteres TXT",
+            "Cantidad máxima de texto a analizar en TXT.",
+            self.app_config.get("max_caracteres_txt", 4000)
+        )
+
+        xml_chars_entry = create_entry(
+            right_column,
+            "Máximo caracteres XML",
+            "Cantidad máxima de contenido a analizar en XML.",
+            self.app_config.get("max_caracteres_xml", 5000)
+        )
+
+        ocr_var = tk.BooleanVar(
+            value=self.app_config.get("aplicar_ocr_imagenes_embebidas", True)
+        )
+
+        word_tables_var = tk.BooleanVar(
+            value=self.app_config.get("extraer_tablas_word", True)
+        )
+
+        pdf_tables_var = tk.BooleanVar(
+            value=self.app_config.get("extraer_tablas_pdf", False)
+        )
+
+        simulation_var = tk.BooleanVar(
+            value=self.app_config.get("modo_simulacion", True)
+        )
+
+        def create_checkbox(parent, text, description, variable):
+            ctk.CTkCheckBox(
+                parent,
+                text=text,
+                variable=variable,
+                font=("Segoe UI", 13),
+            ).pack(anchor="w", pady=(4, 2))
+
+            ctk.CTkLabel(
+                parent,
+                text=description,
+                font=("Segoe UI", 11),
+                text_color="#666666",
+                wraplength=380,
+                justify="left",
+            ).pack(anchor="w", padx=(28, 0), pady=(0, 10))
+
+        create_checkbox(
+            right_column,
+            "OCR imágenes embebidas",
+            "Lee texto dentro de imágenes insertadas en Word o PDF.",
+            ocr_var
+        )
+
+        create_checkbox(
+            right_column,
+            "Extraer tablas Word",
+            "Incluye tablas Word dentro del análisis semántico.",
+            word_tables_var
+        )
+
+        create_checkbox(
+            right_column,
+            "Extraer tablas PDF",
+            "Intenta extraer tablas PDF. Puede generar ruido.",
+            pdf_tables_var
+        )
+
+        create_checkbox(
+            right_column,
+            "Modo simulación",
+            "No mueve archivos reales, solo genera propuestas.",
+            simulation_var
+        )
+
+        def save_config():
+            try:
+                config = {
+                    "max_caracteres_pdf": int(pdf_chars_entry.get()),
+                    "max_caracteres_word": int(word_chars_entry.get()),
+                    "max_caracteres_excel": int(excel_chars_entry.get()),
+                    "max_caracteres_txt": int(txt_chars_entry.get()),
+                    "max_caracteres_xml": int(xml_chars_entry.get()),
+                    "aplicar_ocr_imagenes_embebidas": bool(ocr_var.get()),
+                    "extraer_tablas_word": bool(word_tables_var.get()),
+                    "extraer_tablas_pdf": bool(pdf_tables_var.get()),
+                    "modo_simulacion": bool(simulation_var.get()),
+                }
+
+                if any(
+                    value <= 0
+                    for key, value in config.items()
+                    if key.startswith("max_caracteres")
+                ):
+                    raise ValueError
+
+                self.app_config = config
+
+                save_extraction_config(config)
+
+                messagebox.showinfo(
+                    "Configuración",
+                    "Configuración guardada correctamente."
+                )
+
+                window.destroy()
+
+            except ValueError:
+                messagebox.showerror(
+                    "Error",
+                    "Los límites de caracteres deben ser números enteros mayores a 0."
+                )
+
+        ctk.CTkButton(
+            window,
+            text="Guardar configuración",
+            height=38,
+            font=("Segoe UI", 13, "bold"),
+            command=save_config,
+        ).pack(fill="x", padx=24, pady=(0, 20))
 
     def run_classification(self):
         files = self.get_files_from_tree()
@@ -594,13 +798,13 @@ class DocumentIngestionApp(ctk.CTk):
         self.clear_tree()
 
         # ── Guardar JSON completo en disco ──────────────────────────────
-        try:
-            ruta = "./datos.json"
-            with open(ruta, "w", encoding="utf-8") as archivo:
-                json.dump(results, archivo, ensure_ascii=False, indent=4)
-            print(f"Archivo guardado correctamente en: {ruta}")
-        except Exception as e:
-            print(f"Error al guardar el archivo: {e}")
+        #try:
+        #    ruta = "./datos.json"
+        #    with open(ruta, "w", encoding="utf-8") as archivo:
+        #        json.dump(results, archivo, ensure_ascii=False, indent=4)
+        #    print(f"Archivo guardado correctamente en: {ruta}")
+        #except Exception as e:
+        #    print(f"Error al guardar el archivo: {e}")
 
         # ── Reconfigurar columnas para vista de clasificación ───────────
         self.tree["columns"] = (

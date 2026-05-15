@@ -1,7 +1,8 @@
 import os
 import re
 import shutil
-
+import json
+from pathlib import Path
 
 MIN_BLOCK_TEXT_LENGTH = 5
 MIN_BLOCK_SCORE = 0.30
@@ -408,3 +409,75 @@ def calculate_document_score(blocks: list[dict]) -> float:
         sum(weighted_scores) / max(sum(weights), 1),
         3
     )
+
+
+##################################################
+# Configuraciones
+##################################################
+
+
+CONFIG_PATH = Path("configuracion.json")
+
+DEFAULT_EXTRACTION_CONFIG = {
+    "max_caracteres_pdf": 15000,
+    "max_caracteres_word": 8000,
+    "max_caracteres_excel": 6000,
+    "max_caracteres_txt": 4000,
+    "max_caracteres_xml": 5000,
+    "aplicar_ocr_imagenes_embebidas": True,
+    "extraer_tablas_word": True,
+    "extraer_tablas_pdf": False,
+    "modo_simulacion": True
+}
+
+def load_extraction_config() -> dict:
+    if not CONFIG_PATH.exists():
+        return DEFAULT_EXTRACTION_CONFIG.copy()
+
+    try:
+        with open(CONFIG_PATH, "r", encoding="utf-8") as file:
+            config = json.load(file)
+
+        return {**DEFAULT_EXTRACTION_CONFIG, **config}
+
+    except Exception:
+        return DEFAULT_EXTRACTION_CONFIG.copy()
+
+
+def limit_blocks_by_chars(
+    blocks: list[dict],
+    max_chars: int
+) -> list[dict]:
+    if not max_chars or max_chars <= 0:
+        return blocks
+
+    limited_blocks = []
+    total_chars = 0
+
+    for block in blocks:
+        text = block.get("text", "")
+
+        if total_chars >= max_chars:
+            break
+
+        remaining = max_chars - total_chars
+
+        if len(text) > remaining:
+            block = block.copy()
+            block["text"] = text[:remaining].rstrip()
+            limited_blocks.append(block)
+            break
+
+        limited_blocks.append(block)
+        total_chars += len(text)
+
+    return limited_blocks
+
+def save_extraction_config(config: dict) -> None:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as file:
+        json.dump(
+            config,
+            file,
+            ensure_ascii=False,
+            indent=4
+        )

@@ -1,8 +1,6 @@
 import os
 import win32com.client
-
 from docx import Document
-
 from ..ocr.ocr import extract_ocr_image
 from .utils import (
     clean_temp_dir,
@@ -12,10 +10,14 @@ from .utils import (
     build_document_output,
     normalize_score,
     score_to_confidence,
-    score_to_quality
+    score_to_quality,
+    load_extraction_config,
+    limit_blocks_by_chars
 )
 
 OUTPUT_DIR = "temp_files"
+
+config = load_extraction_config()
 
 
 def main_word(ext, path):
@@ -26,20 +28,17 @@ def main_word(ext, path):
 
     try:
         working_path, extraction_method = prepare_word_file(ext, path)
+        
 
         #ABRE EL DOCUMENTO
         doc = Document(working_path)
         # EXTRAE LOS BLOQUES DE TEXTO
-        blocks = get_word_text(doc)
-        # EXTRAE IMAGENES
-        images = get_images_from_word(doc, OUTPUT_DIR)
-
-        ocr_blocks = apply_ocr_to_word_images(
-            image_paths=images,
-            start_order=len(blocks) + 1
+        blocks, images = get_word_text(doc)
+        
+        blocks = limit_blocks_by_chars(
+            blocks=blocks,
+            max_chars=config.get("max_caracteres_word")
         )
-
-        blocks.extend(ocr_blocks)
 
         supported = True
 
@@ -47,7 +46,6 @@ def main_word(ext, path):
         extraction_method = None
         error = str(e)
     finally:
-        clean_temp_files(images)
         clean_temp_dir(OUTPUT_DIR)
 
     return build_document_output(
@@ -98,19 +96,27 @@ def prepare_word_file(ext: str, path: str) -> tuple[str, str]:
 
 def get_word_text(doc: Document) -> list[dict]:
     blocks = []
-
+    images = []
     blocks.extend(extract_paragraph_blocks(doc))
 
     blocks = merge_related_paragraphs(blocks)
-
-    blocks.extend(
-        extract_table_blocks(
-            doc,
-            start_order=len(blocks) + 1
+    # EXTRAE TABLAS
+    if config.get("extraer_tablas_word", True):
+        blocks.extend(
+            extract_table_blocks(
+                doc,
+                start_order=len(blocks) + 1
+            )
         )
-    )
+    # EXTRAE IMAGENES
+    if config.get("aplicar_ocr_imagenes_embebidas", True):
+        images = get_images_from_word(doc, OUTPUT_DIR)
 
-    return blocks
+        blocks.extend(apply_ocr_to_word_images(
+            image_paths=images,
+            start_order=len(blocks) + 1
+        ))
+    return blocks, images
 
 
 def extract_paragraph_blocks(doc: Document) -> list[dict]:
