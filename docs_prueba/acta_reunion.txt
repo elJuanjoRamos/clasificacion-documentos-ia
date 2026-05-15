@@ -1,0 +1,22 @@
+﻿ACTA DE REUNIÓN
+
+Fecha: 12 de mayo de 2026
+Lugar: Sala de juntas, piso 3
+Hora inicio: 09:00 am   Hora fin: 11:00 am
+
+Asistentes:
+- María García - Gerente de Proyectos
+- Carlos López - Líder Técnico
+- Ana Rodríguez - QA Lead
+
+Orden del día:
+1. Avance del Sprint 4
+2. Revisión de incidencias críticas
+3. Fecha de entrega versión beta
+
+Acuerdos:
+- El equipo de desarrollo entregará la versión beta el 20 de mayo.
+- Se programan pruebas de regresión para el 22 y 23 de mayo.
+- Carlos preparará el informe de arquitectura antes del viernes.
+
+Próxima reunión: 19 de mayo de 2026.

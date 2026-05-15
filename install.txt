@@ -1,24 +1,61 @@
-# =========================
-# DEPENDENCIAS PRINCIPALES
-# =========================
+# ===================================
+# DEPENDENCIAS PRINCIPALES (pip)
+# ===================================
 
+# -- GUI --
 customtkinter
 pillow
-pandas
+
+# -- Extracción de texto: Word --
+python-docx
 pywin32
+
+# -- Extracción de texto: PDF --
 pdfplumber
-pytesseract
+pymupdf
 pdf2image
+
+# -- Extracción de texto: Excel --
+pandas
+openpyxl
+
+# -- OCR (imágenes y PDFs escaneados) --
+pytesseract
 opencv-python
+numpy
+
+# -- LLM local (Ollama) --
 requests
+
+# -- Embeddings y memoria semántica --
 sentence-transformers
 scikit-learn
-pymupdf
+chromadb
+
+# -- NLP / Normalización --
 spacy
 
-# =========================
-# MODELOS Y CONFIGURACION
-# =========================
 
-#python -m spacy download es_core_news_md
-#python -m pywin32_postinstall install
+# ===================================
+# HERRAMIENTAS EXTERNAS (no pip)
+# ===================================
+
+# Tesseract OCR  → https://github.com/tesseract-ocr/tesseract
+#   Windows: https://github.com/UB-Mannheim/tesseract/wiki
+#   Ruta esperada: C:\Program Files\Tesseract-OCR\tesseract.exe
+
+# Poppler (requerido por pdf2image)
+#   Windows: https://github.com/oschwartz10612/poppler-windows/releases
+#   Agregar bin/ al PATH del sistema.
+
+# Ollama (runtime LLM local) → https://ollama.com/download
+#   Iniciar con: ollama serve
+#   Modelo actual: ollama pull qwen2.5:0.5b
+
+
+# ===================================
+# COMANDOS POST-INSTALACIÓN
+# ===================================
+
+# python -m spacy download es_core_news_md
+# python -m pywin32_postinstall install

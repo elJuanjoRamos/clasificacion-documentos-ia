@@ -1,0 +1,16 @@
+﻿FACTURA DE VENTA No. 2026-0042
+
+Fecha: 10 de mayo de 2026
+Proveedor: Soluciones Tech Ltda. NIT: 900.123.456-7
+Cliente: Comercializadora ABC S.A.S. NIT: 800.987.654-3
+
+Descripción                      Cantidad    Valor Unitario    Total
+Licencia software gestión           1           .500.000    .500.000
+Soporte técnico mensual             3           .000      .400.000
+Capacitación usuarios               1           .000      .000
+
+Subtotal: .500.000
+IVA 19%:  .045.000
+TOTAL:    .545.000
+
+Forma de pago: 30 días

@@ -1,0 +1,74 @@
+{
+  "version": 2,
+  "created_at": "2026-05-14T00:39:52",
+  "updated_at": "2026-05-14T00:39:52",
+  "categories": [
+    {
+      "id": "acta",
+      "name": "Acta",
+      "description": "Categoría para documentos de tipo Acta. Subtipo frecuente: Acta de reunión. Esta categoría agrupa documentos por tipo documental, no por tema específico.",
+      "status": "provisional",
+      "requires_review": true,
+      "subcategories": [
+        "Acta de reunión"
+      ],
+      "tipo_documento": [],
+      "area_funcional": [],
+      "palabras_clave": [],
+      "created_at": "2026-05-14T00:39:52",
+      "updated_at": "2026-05-14T00:39:52",
+      "document_count": 1,
+      "examples": [
+        {
+          "file_name": "04_MUIA_Razonamiento_y_planificacion_Tema5.pdf",
+          "full_path": "C:\\Users\\pc\\Documents\\UNIR MASTER IA\\Contenido RAPA\\razonamiento\\04_MUIA_Razonamiento_y_planificacion_Tema5.pdf",
+          "subcategoria": "Acta de reunión",
+          "tipo_documento": null,
+          "area_funcional": null,
+          "tema": "Clasificación por reglas léxicas (Ollama no disponible)",
+          "palabras_clave": [],
+          "decision": {
+            "categoria_final": "Acta",
+            "origen_categoria": "revision",
+            "confianza": "baja",
+            "similitud": 0.5702,
+            "requiere_revision": true,
+            "llm_usado": true,
+            "motivo": "Similitud intermedia. Requiere revisión antes de decidir."
+          },
+          "created_at": "2026-05-14T00:39:52"
+        }
+      ],
+      "history": [
+        {
+          "event": "document_classified",
+          "file_name": "04_MUIA_Razonamiento_y_planificacion_Tema5.pdf",
+          "origen_categoria": "revision",
+          "confianza": "baja",
+          "similitud": 0.5702,
+          "requiere_revision": true,
+          "created_at": "2026-05-14T00:39:52"
+        }
+      ]
+    }
+  ],
+  "pending_reviews": [
+    {
+      "file_name": "04_MUIA_Razonamiento_y_planificacion_Tema5.pdf",
+      "full_path": "C:\\Users\\pc\\Documents\\UNIR MASTER IA\\Contenido RAPA\\razonamiento\\04_MUIA_Razonamiento_y_planificacion_Tema5.pdf",
+      "categoria_propuesta": "Acta",
+      "origen_categoria": "revision",
+      "similitud": 0.5702,
+      "motivo": "Similitud intermedia. Requiere revisión antes de decidir.",
+      "semantic_profile": {
+        "categoria_general": "Acta",
+        "subcategoria": "Acta de reunión",
+        "tema": "Clasificación por reglas léxicas (Ollama no disponible)",
+        "palabras_clave": [],
+        "resumen": "FEATURES GENERALES\nCONCEPTOS: Competición Esa, El objetivo del robot, P1, P2, P3, El robot parte, Sin embargo, cada planeta, P1 P2 2 40 P1 P3, Representa el sistema, Define, Cambia, El robot, A*?, Pro",
+        "_fallback": true
+      },
+      "created_at": "2026-05-14T00:39:52"
+    }
+  ]
+}
