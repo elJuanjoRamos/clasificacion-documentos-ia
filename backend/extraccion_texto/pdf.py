@@ -15,10 +15,12 @@ from .utils import (
     build_document_output,
     normalize_score,
     score_to_confidence,
-    score_to_quality
+    score_to_quality,
+    load_extraction_config,
+    limit_blocks_by_chars
 )
 
-TEMP_PDF_IMAGES_DIR = "temp_pdf_images"
+TEMP_PDF_IMAGES_DIR = "temp_files"
 
 BLANK_PAGE_WHITE_THRESHOLD = 245
 BLANK_PAGE_MIN_WHITE_PERCENTAGE = 0.98
@@ -26,16 +28,21 @@ BLANK_PAGE_MIN_WHITE_PERCENTAGE = 0.98
 FALLBACK_RENDER_DPI = 40
 FALLBACK_OCR_RENDER_DPI = 300
 
+config = load_extraction_config()
+
 
 def main_pdf(ext, path):
     blocks = []
     error = None
     supported = False
     analysis = {}
-
+    
     try:
         blocks, analysis = extract_pdf_blocks(path)
-
+        blocks = limit_blocks_by_chars(
+            blocks=blocks,
+            max_chars=config.get("max_caracteres_pdf")
+        )
         supported = True
 
     except Exception as e:
@@ -114,30 +121,36 @@ def extract_pdf_blocks(file_path: str):
             # TABLAS
             #
 
-            table_blocks = extract_page_tables(
-                page=plumber_page,
-                page_number=page_number
-            )
+            table_blocks = []
 
-            if table_blocks:
-                analysis["table_pages"] += 1
-                analysis["total_tables"] += len(table_blocks)
-                page_blocks.extend(table_blocks)
+            if config.get("extraer_tablas_pdf", False):
+                table_blocks = extract_page_tables(
+                    page=plumber_page,
+                    page_number=page_number
+                )
+
+                if table_blocks:
+                    analysis["table_pages"] += 1
+                    analysis["total_tables"] += len(table_blocks)
+                    page_blocks.extend(table_blocks)
 
             #
             # IMAGENES EMBEBIDAS
             #
 
-            image_blocks = extract_page_image_ocr_blocks(
-                page=fitz_page,
-                page_number=page_number
-            )
+            image_blocks = []
 
-            if image_blocks:
-                analysis["image_pages"] += 1
-                analysis["ocr_image_pages"] += 1
-                analysis["total_images"] += len(image_blocks)
-                page_blocks.extend(image_blocks)
+            if config.get("aplicar_ocr_imagenes_embebidas", True):
+                image_blocks = extract_page_image_ocr_blocks(
+                    page=fitz_page,
+                    page_number=page_number
+                )
+
+                if image_blocks:
+                    analysis["image_pages"] += 1
+                    analysis["ocr_image_pages"] += 1
+                    analysis["total_images"] += len(image_blocks)
+                    page_blocks.extend(image_blocks)
 
             #
             # FALLBACK OCR PAGINA COMPLETA

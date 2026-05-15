@@ -6,7 +6,7 @@ import requests
 
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "qwen2.5:0.5b"  # Modelo local descargado. Otras opciones: "mistral", "llama3", "gemma3"
+MODEL_NAME = "mistral" #"qwen2.5:0.5b"  # Modelo local descargado. Otras opciones: "mistral", "llama3", "gemma3"
 
 
 def build_llm_prompt(document_text: str) -> str:

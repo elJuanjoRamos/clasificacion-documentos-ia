@@ -1,6 +1,12 @@
 import pandas as pd
 
-from .utils import clean_text, create_block, build_document_output
+from .utils import (
+    clean_text,
+    create_block,
+    build_document_output,
+    load_extraction_config,
+    limit_blocks_by_chars
+)
 
 
 def main_excel(ext, path):
@@ -8,9 +14,14 @@ def main_excel(ext, path):
     error = None
     supported = False
     extraction_method = None
+    config = load_extraction_config()
 
     try:
         blocks = get_excel_text(path)
+        blocks = limit_blocks_by_chars(
+            blocks=blocks,
+            max_chars=config.get("max_caracteres_excel")
+        )
         supported = True
         extraction_method = "excel_structured"
 
